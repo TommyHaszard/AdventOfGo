@@ -2,55 +2,65 @@ package main
 
 import (
 	"bufio"
-	"math"
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 func problem2() {
 	file, _ := os.Open("data.txt")
-
 	defer file.Close()
 	sum := 0
 	scanner := bufio.NewScanner(file)
+	lineCount := 0
+	var allLines []string
+	var allNumbers [][]*Info
 	for scanner.Scan() {
-		line := scanner.Text()
-		stripGame := strings.Split(line, ":")
-		power := sumPower(stripGame[1])
-		sum += power
+		allLines = append(allLines, scanner.Text())
+		allNumbers = append(allNumbers, getLineData(scanner.Text(), lineCount))
+		lineCount++
+	}
+
+	for gearIndex, line := range allLines {
+		gearPos := getGearData(line)
+
+		// returns slice of slice but each second slice value is only of index 0
+		for _, pos := range gearPos {
+			var found []*Info
+			for _, line := range allNumbers {
+				for _, info := range line {
+					if info.SearchForGear(gearIndex, pos[0], len(allLines)) {
+						found = append(found, info)
+					}
+				}
+			}
+			if len(found) == 2 {
+				sum += (found[0].number * found[1].number)
+			}
+		}
+
 	}
 	print("Problem 2: ")
 	println(sum)
+
 }
-
-func sumPower(input string) int {
-	sets := strings.Split(input, ";")
-	greenMax := 0
-	blueMax := 0
-	redMax := 0
-
-	for i := range sets {
-		reNum := regexp.MustCompile("[0-9]+")
-		colours := strings.Split(sets[i], ",")
-
-		for x := range colours {
-			if strings.Contains(colours[x], "red") {
-				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				redMax = int(math.Round(math.Max(float64(redMax), float64(num))))
-			}
-			if strings.Contains(colours[x], "green") {
-				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				greenMax = int(math.Round(math.Max(float64(greenMax), float64(num))))
-			}
-			if strings.Contains(colours[x], "blue") {
-				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				blueMax = int(math.Round(math.Max(float64(blueMax), float64(num))))
-			}
+func (s *Info) SearchForGear(index int, gearPos int, maxLines int) bool {
+	rangeOfNumber := len(strconv.Itoa(s.number))
+	end := s.pos + rangeOfNumber
+	for i := index - 1; i <= index+1; i++ {
+		if i < 0 || i > maxLines || s.lineNr != i {
+			continue
+		}
+		// checks if position of gear is within the search radius around the number
+		if s.pos-1 <= gearPos && gearPos <= end {
+			return true
 		}
 	}
+	return false
+}
 
-	power := greenMax * blueMax * redMax
-	return power
+func getGearData(line string) [][]int {
+	re := regexp.MustCompile("[*]")
+	gears := re.FindAllStringIndex(line, -1)
+	return gears
 }
