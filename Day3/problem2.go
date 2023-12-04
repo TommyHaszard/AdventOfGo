@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -37,21 +38,15 @@ func sumPower(input string) int {
 		for x := range colours {
 			if strings.Contains(colours[x], "red") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > redMax {
-					redMax = num
-				}
+				redMax = int(math.Round(math.Max(float64(redMax), float64(num))))
 			}
 			if strings.Contains(colours[x], "green") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > greenMax {
-					greenMax = num
-				}
+				greenMax = int(math.Round(math.Max(float64(greenMax), float64(num))))
 			}
 			if strings.Contains(colours[x], "blue") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > blueMax {
-					blueMax = num
-				}
+				blueMax = int(math.Round(math.Max(float64(blueMax), float64(num))))
 			}
 		}
 	}

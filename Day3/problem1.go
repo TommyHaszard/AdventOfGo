@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func problem2() {
+func problem1() {
 	file, _ := os.Open("data.txt")
 
 	defer file.Close()
@@ -16,46 +16,45 @@ func problem2() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		gameRe := regexp.MustCompile("[0-9]+")
+		gameNum, _ := strconv.Atoi(gameRe.FindString(line))
 		stripGame := strings.Split(line, ":")
-		power := sumPower(stripGame[1])
-		sum += power
+		goesOver := numCheck(stripGame[1])
+		if goesOver {
+			println(gameNum)
+			sum += gameNum
+		}
 	}
 	print("Problem 2: ")
 	println(sum)
 }
 
-func sumPower(input string) int {
+func numCheck(input string) bool {
 	sets := strings.Split(input, ";")
-	greenMax := 0
-	blueMax := 0
-	redMax := 0
-
 	for i := range sets {
 		reNum := regexp.MustCompile("[0-9]+")
 		colours := strings.Split(sets[i], ",")
-
 		for x := range colours {
 			if strings.Contains(colours[x], "red") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > redMax {
-					redMax = num
+				if num > 12 {
+					return false
 				}
 			}
 			if strings.Contains(colours[x], "green") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > greenMax {
-					greenMax = num
+				if num > 13 {
+					return false
 				}
 			}
 			if strings.Contains(colours[x], "blue") {
 				num, _ := strconv.Atoi(reNum.FindString(colours[x]))
-				if num > blueMax {
-					blueMax = num
+				if num > 14 {
+					return false
 				}
 			}
 		}
 	}
-
-	power := greenMax * blueMax * redMax
-	return power
+	// }
+	return true
 }
